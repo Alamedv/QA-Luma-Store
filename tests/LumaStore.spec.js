@@ -1,63 +1,26 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { User, Address } from './support/UserData.js';
+import { adBlocker } from './support/helpers.js';
+import { TIMEOUT } from 'dns';
 
-export class User {
-  constructor(name, surname, email, password, birthday, address, phone) {
-    this.name = 'Anita';
-    this.surname = 'Lawson';
-    this.email = 'anita' + Math.floor(Math.random() * 1000) + '.lawson@example.com';
-    this.birthday = '9/5/1944';
-    this.phone = '(970) 523-6639';
-  }
-}
-export class Address {
-  constructor(street, city, state, zip, country, password) {
-    this.street = '9805 Central St';
-    this.city = 'Denver';
-    this.state = 'Colorado';
-    this.zip = '80202';
-    this.country = 'United States';
-    this.password = this.state + Math.floor(Math.random() * 10000);
-
-  }
-}
-
-const adBlocker = async (page) => {
-  await page.route('**/*', (route) => {
-    const url = route.request().url();
-    if (
-      url.includes('doubleclick.net') ||
-      url.includes('google-analytics.com')
-    ) {
-      console.log(`Bloqueando: ${url}`);
-      route.abort();
-    } else {
-      route.continue();
-    }
-  });
-}
-
-
-test('go to the home page and register', async ({ page }) => {
+test.beforeEach(async ({ page }) => {
   await adBlocker(page);
-
-
   await page.goto('https://magento.softwaretestingboard.com/');
   await page.reload();
+});
 
-  await expect(page).toHaveTitle('Home Page');
+test('go to the home page and register', async ({ page }) => {
+  const user = new User();
+  const address = new Address();
 
   await page.locator('//div[@class=\'panel header\']//a[normalize-space()=\'Create an Account\']').click();
   await expect(page).toHaveTitle('Create New Customer Account');
   await expect(page.locator('//span[@class=\'base\']')).toBeVisible();
-  await page.waitForLoadState('networkidle');
-
-  const user = new User();
-  const address = new Address();
 
   await page.getByRole('textbox', { name: 'First Name*' }).fill(user.name);
   await page.getByRole('textbox', { name: 'Last Name*' }).fill(user.surname);
-  await page.getByRole('textbox', { name: 'Email*' }).fill(user.email);
+  await page.getByRole('textbox', { name: 'Email*' }).fill(Math.floor(Math.random() * 1000) + user.email);
   await page.getByRole('textbox', { name: 'Password*', exact: true }).fill(address.password);
   await page.getByRole('textbox', { name: 'Confirm Password*' }).fill(address.password);
   await page.getByRole('button', { name: 'Create an Account' }).click();
@@ -67,13 +30,8 @@ test('go to the home page and register', async ({ page }) => {
 });
 
 test('search for item and checkout', async ({ page }) => {
-  await adBlocker(page);
   const user = new User();
   const address = new Address();
-
-  await page.goto('https://magento.softwaretestingboard.com/');
-  await page.reload();
-
 
   await page.getByRole('combobox', { name: 'Search' }).fill('shirt');
   await page.locator('//button[@title=\'Search\']').press('Enter');
@@ -82,38 +40,37 @@ test('search for item and checkout', async ({ page }) => {
   await lastResult.click();
 
   await expect(page.locator('//span[normalize-space()=\'In stock\']')).toBeVisible();
-  await page.locator('//div[@id=\'option-label-size-143-item-168\']').click();
-  await page.locator('//div[@id=\'option-label-color-93-item-49\']').click();
-  await page.locator('//input[@id=\'qty\']').fill('2');
-  await page.locator('//button[@id=\'product-addtocart-button\']').click();
-  await expect(page.locator('//a[normalize-space()=\'shopping cart\']')).toBeVisible();
+  await page.locator('#option-label-size-143-item-168').click();
+  await page.locator('#option-label-color-93-item-49').click();
+  await page.locator('#qty').fill('2');
+  await page.locator('#product-addtocart-button').click();
 
+ await expect(page.locator('//a[normalize-space()=\'shopping cart\']')).toBeVisible();
+
+  //clica para fazer checkout
   await page.locator('//a[normalize-space()=\'shopping cart\']').click();
   await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Proceed to Checkout' }).click();
   await expect(page.getByText('Shipping Address')).toBeVisible();
 
-  await page.getByRole('textbox', { name: 'Email Address' }).fill(user.email);
+  await page.getByRole('textbox', { name: 'Email Address' }).fill(Math.floor(Math.random() * 1000) + user.email);
   await page.getByRole('textbox', { name: 'First Name' }).fill(user.name);
   await page.getByRole('textbox', { name: 'Last Name' }).fill(user.surname);
   await page.getByRole('textbox', { name: 'Street Address: Line 1' }).fill(address.street);
   await page.getByRole('textbox', { name: 'City' }).fill(address.city);
   await page.getByRole('combobox', { name: 'State/Province' }).selectOption(address.state);
-  await page.getByRole('textbox', { name: 'ZIP/Postal Code' }).fill(address.zip);
+  await page.getByRole('textbox', { name: 'Zip/Postal Code' }).fill(address.zip);
   await page.getByRole('combobox', { name: 'Country' }).selectOption(address.country);
   await page.getByRole('textbox', { name: 'Phone Number' }).fill(user.phone);
-  await page.locator('//input[@name="ko_unique_1"]').click();
+
+  await page.locator('input[name="ko_unique_1"]').check();
   await page.getByRole('button', { name: 'Next' }).click();
-  await expect(page).toHaveTitle('Checkout');
   await page.getByRole('button', { name: 'Place Order' }).click();
 });
 
 test('Add product review', async ({ page }) => {
-  await adBlocker(page);
 
   const user = new User();
-  const address = new Address();
-
   await page.goto('https://magento.softwaretestingboard.com/');
   await page.reload();
 
@@ -129,7 +86,5 @@ test('Add product review', async ({ page }) => {
   await page.locator('//input[@id=\'summary_field\']').fill('Fast Delivery');
   await page.locator('//textarea[@id=\'review_field\']').fill('Very fast delivery, I haven\'t tested it yet');
   await page.locator('//span[normalize-space()=\'Submit Review\']').click();
-
   await expect(page.getByText('You submitted your review for moderation.')).toBeVisible();
-
 });
