@@ -1,6 +1,6 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
-import { User, Address } from './support/UserData.js';
+import { User, Address } from './support/userData.js';
 import { adBlocker } from './support/helpers.js';
 import { TIMEOUT } from 'dns';
 import { defineConfig, devices } from '@playwright/test';
