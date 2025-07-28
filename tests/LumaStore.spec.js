@@ -1,7 +1,6 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 
-//dados do usuario
 export class User {
   constructor(name, surname, email, password, birthday, address, phone) {
     this.name = 'Anita';
@@ -11,7 +10,6 @@ export class User {
     this.phone = '(970) 523-6639';
   }
 }
-//endereço do usuario
 export class Address {
   constructor(street, city, state, zip, country, password) {
     this.street = '9805 Central St';
@@ -24,7 +22,6 @@ export class Address {
   }
 }
 
-// Bloqueador de anúncios
 const adBlocker = async (page) => {
   await page.route('**/*', (route) => {
     const url = route.request().url();
@@ -48,7 +45,6 @@ test('go to the home page and register', async ({ page }) => {
   await page.goto('https://magento.softwaretestingboard.com/');
   await page.reload();
 
-  // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle('Home Page');
 
   await page.locator('//div[@class=\'panel header\']//a[normalize-space()=\'Create an Account\']').click();
@@ -59,7 +55,6 @@ test('go to the home page and register', async ({ page }) => {
   const user = new User();
   const address = new Address();
 
-  //preencher os campos do formulário
   await page.getByRole('textbox', { name: 'First Name*' }).fill(user.name);
   await page.getByRole('textbox', { name: 'Last Name*' }).fill(user.surname);
   await page.getByRole('textbox', { name: 'Email*' }).fill(user.email);
@@ -67,7 +62,6 @@ test('go to the home page and register', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Confirm Password*' }).fill(address.password);
   await page.getByRole('button', { name: 'Create an Account' }).click();
 
-  //verifica se o usuário foi registrado com sucesso
   await expect(page.getByText('Thank you for registering with Main Website Store.')).toBeVisible();
 
 });
@@ -81,15 +75,12 @@ test('search for item and checkout', async ({ page }) => {
   await page.reload();
 
 
-  //pesquisa pelo item
   await page.getByRole('combobox', { name: 'Search' }).fill('shirt');
   await page.locator('//button[@title=\'Search\']').press('Enter');
 
-  //escolhe a ultima opçao
   const lastResult = page.locator('.product-item').last();
   await lastResult.click();
 
-  //personaliza a camiseta
   await expect(page.locator('//span[normalize-space()=\'In stock\']')).toBeVisible();
   await page.locator('//div[@id=\'option-label-size-143-item-168\']').click();
   await page.locator('//div[@id=\'option-label-color-93-item-49\']').click();
@@ -97,13 +88,11 @@ test('search for item and checkout', async ({ page }) => {
   await page.locator('//button[@id=\'product-addtocart-button\']').click();
   await expect(page.locator('//a[normalize-space()=\'shopping cart\']')).toBeVisible();
 
-  //clica para fazer checkout
   await page.locator('//a[normalize-space()=\'shopping cart\']').click();
   await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Proceed to Checkout' }).click();
   await expect(page.getByText('Shipping Address')).toBeVisible();
 
-  //preenche endereço
   await page.getByRole('textbox', { name: 'Email Address' }).fill(user.email);
   await page.getByRole('textbox', { name: 'First Name' }).fill(user.name);
   await page.getByRole('textbox', { name: 'Last Name' }).fill(user.surname);
@@ -141,7 +130,6 @@ test('Add product review', async ({ page }) => {
   await page.locator('//textarea[@id=\'review_field\']').fill('Very fast delivery, I haven\'t tested it yet');
   await page.locator('//span[normalize-space()=\'Submit Review\']').click();
 
-  //depois de dar nota do produto verifica se a mensagem de sucesso aparece
   await expect(page.getByText('You submitted your review for moderation.')).toBeVisible();
 
 });
