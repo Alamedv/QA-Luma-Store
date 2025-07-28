@@ -8,10 +8,6 @@ export class User {
   }
 }
 
-/**
- * Classe para gerar dados de endereço e senha.
- * A senha é gerada aleatoriamente para cada instância.
- */
 export class Address {
   constructor() {
     this.street = '9805 Central St';
