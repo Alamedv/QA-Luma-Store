@@ -32,7 +32,7 @@ Os seguintes fluxos de usuário foram automatizados e são validados continuamen
 ## Tecnologias Utilizadas
 
 * **[Playwright](https://playwright.dev/):** Framework de automação de testes para interações web modernas.
-* **[Javascript]:** Superset do JavaScript que adiciona tipagem estática ao código.
+* **[Typescript]:** Superset do JavaScript que adiciona tipagem estática ao código.
 * **[Node.js](https://nodejs.org/):** Ambiente de execução para o projeto.
 * **[Git & GitHub](https://github.com/):** Para versionamento de código.
 * **[GitHub Actions](https://github.com/features/actions):** Para Integração Contínua (CI), executando os testes automaticamente a cada nova alteração no código.
